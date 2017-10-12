@@ -1464,6 +1464,39 @@ namespace wServer.realm.commands
         }
     }
 
+    class CheckBanCommand : Command
+    {
+        public CheckBanCommand() : base("checkban", permLevel: 80) { }
+
+        protected override bool Process(Player player, RealmTime time, string name)
+        {
+            var db = player.Manager.Database;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                player.SendInfo("Usage: /checkban <player name>");
+                return true;
+            }
+
+            int id = db.ResolveId(name);
+            if (id == 0)
+            {
+                player.SendError("Account doesn't exist...");
+                return false;
+            }
+
+            var target = db.GetAccount(id);
+
+            if (!target.Banned)
+            {
+                player.SendInfo($"{target.Name} is not banned.");
+                return false;
+            }
+
+            player.SendInfo($"{target.Name} is banned for '{target.Notes}'");
+            return true;
+        }
+    }
+
     class ClearInvCommand : Command
     {
         public ClearInvCommand() : base("clearinv", permLevel: 80) { }
