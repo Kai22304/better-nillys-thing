@@ -453,6 +453,12 @@ namespace common
             set { SetValue<string>("notes", value); }
         }
 
+        public int BannedBy
+        {
+            get { return GetValue<int>("bannedBy"); }
+            set { SetValue<int>("bannedBy", value); }
+        }
+
         public bool Hidden
         {
             get { return GetValue<bool>("hidden"); }

@@ -1313,7 +1313,7 @@ namespace wServer.realm.commands
             }
 
             // ban player + disconnect if currently connected
-            player.Manager.Database.Ban(bInfo.accountId, bInfo.banReasons, bInfo.banLiftTime);
+            player.Manager.Database.Ban(bInfo.accountId, bInfo.banReasons, bInfo.banLiftTime, player.AccountId);
             var target = player.Manager.Clients.Keys
                 .SingleOrDefault(c => c.Account != null && c.Account.AccountId == bInfo.accountId);
             target?.Disconnect();
@@ -1394,7 +1394,7 @@ namespace wServer.realm.commands
             }
 
             // ban
-            db.Ban(acc.AccountId, reason);
+            db.Ban(acc.AccountId, reason, bannedBy: player.AccountId);
             db.BanIp(acc.IP, reason);
             
             // disconnect currently connected
@@ -1492,7 +1492,7 @@ namespace wServer.realm.commands
                 return false;
             }
 
-            player.SendInfo($"{target.Name} is banned for '{target.Notes}'");
+            player.SendInfo($"{target.Name} is banned by {db.ResolveIgn(target.BannedBy)} for '{target.Notes}'");
             return true;
         }
     }

@@ -1278,13 +1278,14 @@ namespace common
             return _db.KeyExistsAsync($"mutes:{ip}");
         }
 
-        public void Ban(int accId, string reason = "", int liftTime = -1)
+        public void Ban(int accId, string reason = "", int liftTime = -1, int bannedBy = 0)
         {
             var acc = new DbAccount(_db, accId)
             {
                 Banned = true,
                 Notes = reason,
-                BanLiftTime = liftTime
+                BanLiftTime = liftTime,
+                BannedBy = bannedBy
             };
             acc.FlushAsync();
         }
@@ -1295,6 +1296,7 @@ namespace common
             if (acc.Banned)
             {
                 acc.Banned = false;
+                acc.BannedBy = 0;
                 acc.FlushAsync();
                 return true;
             }
