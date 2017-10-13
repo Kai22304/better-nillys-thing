@@ -1135,6 +1135,7 @@ namespace common
         public HashSet<int> Accounts { get; set; }
         public bool Banned { get; set; }
         public string Notes { get; set; }
+        public int BannedBy { get; set; }
 
         public void Flush()
         {

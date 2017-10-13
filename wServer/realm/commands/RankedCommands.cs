@@ -1395,7 +1395,7 @@ namespace wServer.realm.commands
 
             // ban
             db.Ban(acc.AccountId, reason, bannedBy: player.AccountId);
-            db.BanIp(acc.IP, reason);
+            db.BanIp(acc.IP, reason, player.AccountId);
             
             // disconnect currently connected
             var targets = manager.Clients.Keys.Where(c => c.IP.Equals(acc.IP));
@@ -1485,14 +1485,19 @@ namespace wServer.realm.commands
             }
 
             var target = db.GetAccount(id);
+            var targetip = db.GetIpInfo(target.IP);
 
-            if (!target.Banned)
+            if (!target.Banned && !targetip.Banned)
             {
                 player.SendInfo($"{target.Name} is not banned.");
                 return false;
             }
 
-            player.SendInfo($"{target.Name} is banned by {db.ResolveIgn(target.BannedBy)} for '{target.Notes}'");
+            if (targetip.Banned)
+                player.SendInfo($"{target.Name} is ip banned by {db.ResolveIgn(targetip.BannedBy)} for '{targetip.Notes}'");
+            else
+                player.SendInfo($"{target.Name} is banned by {db.ResolveIgn(target.BannedBy)} for '{target.Notes}'");
+
             return true;
         }
     }

@@ -427,6 +427,11 @@ namespace common
                 return null;
             return ret;
         }
+        public DbIpInfo GetIpInfo(string ip)
+        {
+            var ret = new DbIpInfo(_db, ip);
+            return ret;
+        }
 
         public void LockAccount(DbAccount target, DbAccount acc, bool add)
         {
@@ -1304,11 +1309,12 @@ namespace common
             return false;
         }
 
-        public void BanIp(string ip, string notes = "")
+        public void BanIp(string ip, string notes = "", int bannedBy = 0)
         {
             var abi = new DbIpInfo(_db, ip)
             {
                 Banned = true,
+                BannedBy = bannedBy,
                 Notes = notes
             };
             abi.Flush();
@@ -1320,6 +1326,7 @@ namespace common
             if (!abi.IsNull && abi.Banned)
             {
                 abi.Banned = false;
+                abi.BannedBy = 0;
                 abi.Flush();
                 return true;
             }

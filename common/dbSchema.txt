@@ -145,6 +145,7 @@ ips
     Accounts (int[])
     Banned (bool)
     Notes (string)
+	BannedBy (int)
 
 pet.(accId).(petId)
   objType (ushort)
