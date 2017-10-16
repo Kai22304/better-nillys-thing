@@ -19,6 +19,7 @@ names
 
 account.(accId)
   accountIdOverride (int)
+  accountIdSpy (int)
   bannedBy (int)
   uuid (string)
   name (string)

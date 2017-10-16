@@ -294,5 +294,19 @@ namespace wServer.realm.entities
                 Txt = text
             });
         }
+
+        internal void SendSpy(Player from, string text, int nameColor = 0x123456, int textColor = 0x123456, string to = null)
+        {
+            Client.SendPacket(new Text()
+            {
+                BubbleTime = 0,
+                NumStars = from.Stars,
+                Name = from.Name + (to != null ? $" to {to}" : ""),
+                Txt = $"[{from.Owner.Name} {from.Owner.Id}] {text}",
+                NameColor = nameColor,
+                TextColor = textColor,
+                Admin = from.Admin
+            });
+        }
     }
 }

@@ -75,6 +75,7 @@ namespace wServer.realm
                     TextColor = (src.Glow != 0) ? 0xFFFFFF : 0x123456
                 };
 
+                src.CheckSpy(Player.SpyType.Public, text);
                 SendTextPacket(src, tp, p => !p.Client.Account.IgnoreList.Contains(src.AccountId));
             }
         }

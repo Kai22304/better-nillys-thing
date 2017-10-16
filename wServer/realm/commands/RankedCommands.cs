@@ -2163,4 +2163,77 @@ namespace wServer.realm.commands
             return true;
         }
     }
+
+    class SpyCommand : Command
+    {
+        public SpyCommand() : base("spy", 90, "view") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            var id = player.Manager.Database.ResolveId(args);
+            if (id == 0)
+            {
+                player.SendError("Account not found!");
+                return false;
+            }
+            if (id == player.AccountId)
+            {
+                player.SendError("You already get your own messages, silly!");
+                return false;
+            }
+            if (player.Rank <= player.Manager.Database.GetAccount(id).Rank)
+            {
+                player.SendError("Cannot spy on someone with the same or higher rank than yours.");
+                return false;
+            }
+
+            var acc = player.Client.Account;
+            if (acc.AccountIdSpy != 0)
+            {
+                player.SendError($"You are already spying on {player.Manager.Database.ResolveIgn(acc.AccountIdSpy)}.");
+                player.SendError($"Use /resetspy to stop spying on that {player.Manager.Database.ResolveIgn(acc.AccountIdSpy)}.");
+                return false;
+            }
+
+            player.SetSpy(id);
+            player.SendInfo($"You are now spying on {args}.");
+            return true;
+        }
+    }
+    class RemoveSpyCommand : Command
+    {
+        public RemoveSpyCommand() : base("removespy", 90, "rspy") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            var id = player.Client.Account.AccountIdSpy;
+            if (id == 0)
+            {
+                player.SendError("You are currently not spying on anybody.");
+                return false;
+            }
+
+            var name = player.Manager.Database.ResolveIgn(id);
+            player.SetSpy();
+            player.SendInfo($"You have stopped spying on {name}.");
+            return true;
+        }
+    }
+    class CheckSpyCommand : Command
+    {
+        public CheckSpyCommand() : base("checkspy", 90, "cspy") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            var acc = player.Client.Account;
+            if (acc.AccountIdSpy == 0)
+            {
+                player.SendInfo("You are currently not spying on anybody.");
+                return true;
+            }
+
+            player.SendInfo($"You are currently spying on {player.Manager.Database.ResolveIgn(acc.AccountIdSpy)}.");
+            return true;
+        }
+    }
 }

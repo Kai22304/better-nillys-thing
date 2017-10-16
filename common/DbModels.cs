@@ -276,7 +276,13 @@ namespace common
             set { SetValue<int>("accountIdOverride", value); }
         }
         public int AccountIdOverrider { get; set; }
-        
+
+        public int AccountIdSpy
+        {
+            get { return GetValue<int>("accountIdSpy"); }
+            set { SetValue<int>("accountIdSpy", value); }
+        }
+
         internal string LockToken { get; set; }
 
         public string UUID
