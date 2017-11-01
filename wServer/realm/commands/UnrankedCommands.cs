@@ -434,7 +434,7 @@ namespace wServer.realm.commands
             for (int i = 0; i < cmds.Length; i++)
             {
                 if (i != 0) sb.Append(", ");
-                sb.Append(cmds[i].CommandName);
+                sb.Append(cmds[i].CommandName + (cmds[i].Alias != "" ? $" ({cmds[i].Alias})" : ""));
             }
 
             player.SendInfo(sb.ToString());
@@ -1650,6 +1650,34 @@ namespace wServer.realm.commands
                 var players = player.Manager.Database.ResolveIgn(ids[i]);
                 sb.Append(players);
             }
+            player.SendInfo(sb.ToString());
+            return true;
+        }
+    }
+
+    class AdminsCommand : Command
+    {
+        public AdminsCommand() : base("admins") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            var servers = player.Manager.InterServer.GetServerList();
+            var players =
+                (from server in servers
+                 from plr in server.playerList
+                 where (!plr.Hidden && plr.Rank >= 80) || player.Client.Account.Admin
+                 select plr)
+                .ToArray();
+
+            var sb = new StringBuilder($"Admins online ({players.Length}): ");
+            for (var i = 0; i < players.Length; i++)
+            {
+                if (i != 0)
+                    sb.Append(", ");
+
+                sb.Append(players[i].Name + " (" + players[i].Rank + ")");
+            }
+
             player.SendInfo(sb.ToString());
             return true;
         }
