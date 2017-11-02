@@ -444,7 +444,7 @@ namespace wServer.realm.commands
 
     class IgnoreCommand : Command
     {
-        public IgnoreCommand() : base("ignore") { }
+        public IgnoreCommand() : base("ignore", alias: "block") { }
 
         protected override bool Process(Player player, RealmTime time, string playerName)
         {
@@ -490,7 +490,7 @@ namespace wServer.realm.commands
 
     class UnignoreCommand : Command
     {
-        public UnignoreCommand() : base("unignore") { }
+        public UnignoreCommand() : base("unignore", alias: "unblock") { }
 
         protected override bool Process(Player player, RealmTime time, string playerName)
         {
@@ -1631,6 +1631,44 @@ namespace wServer.realm.commands
                 sb.Append("\n");
             }
             
+            player.SendInfo(sb.ToString());
+            return true;
+        }
+    }
+
+    class LockListCommand : Command
+    {
+        public LockListCommand() : base("locklist", alias: "locks") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            StringBuilder sb = new StringBuilder("Locked players: ");
+            var ids = player.Client.Account.IgnoreList.ToList().Distinct().ToArray();
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (i != 0) sb.Append(", ");
+                var players = player.Manager.Database.ResolveIgn(ids[i]);
+                sb.Append(players);
+            }
+            player.SendInfo(sb.ToString());
+            return true;
+        }
+    }
+
+    class BlockListCommand : Command
+    {
+        public BlockListCommand() : base("blocklist", alias: "blocks") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            StringBuilder sb = new StringBuilder("Blocked players: ");
+            var ids = player.Client.Account.IgnoreList.ToList().Distinct().ToArray();
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (i != 0) sb.Append(", ");
+                var players = player.Manager.Database.ResolveIgn(ids[i]);
+                sb.Append(players);
+            }
             player.SendInfo(sb.ToString());
             return true;
         }
