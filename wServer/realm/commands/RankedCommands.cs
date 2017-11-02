@@ -1313,7 +1313,7 @@ namespace wServer.realm.commands
             }
 
             // ban player + disconnect if currently connected
-            player.Manager.Database.Ban(bInfo.accountId, bInfo.banReasons, bInfo.banLiftTime);
+            player.Manager.Database.Ban(bInfo.accountId, bInfo.banReasons, bInfo.banLiftTime, player.AccountId);
             var target = player.Manager.Clients.Keys
                 .SingleOrDefault(c => c.Account != null && c.Account.AccountId == bInfo.accountId);
             target?.Disconnect();
@@ -1394,8 +1394,8 @@ namespace wServer.realm.commands
             }
 
             // ban
-            db.Ban(acc.AccountId, reason);
-            db.BanIp(acc.IP, reason);
+            db.Ban(acc.AccountId, reason, bannedBy: player.AccountId);
+            db.BanIp(acc.IP, reason, player.AccountId);
             
             // disconnect currently connected
             var targets = manager.Clients.Keys.Where(c => c.IP.Equals(acc.IP));
@@ -2135,6 +2135,44 @@ namespace wServer.realm.commands
         {
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
+            return true;
+        }
+    }
+
+    class CheckBanCommand : Command
+    {
+        public CheckBanCommand() : base("checkban", 80, "cban") { }
+
+        protected override bool Process(Player player, RealmTime time, string name)
+        {
+            var db = player.Manager.Database;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                player.SendInfo("Usage: /checkban <player name>");
+                return true;
+            }
+
+            int id = db.ResolveId(name);
+            if (id == 0)
+            {
+                player.SendError("Account doesn't exist...");
+                return false;
+            }
+
+            var target = db.GetAccount(id);
+            var targetip = db.GetIpInfo(target.IP);
+
+            if (!target.Banned && !targetip.Banned)
+            {
+                player.SendInfo($"{target.Name} is not banned.");
+                return false;
+            }
+
+            if (targetip.Banned)
+                player.SendInfo($"{target.Name} is ip banned by {db.ResolveIgn(targetip.BannedBy)} for '{targetip.Notes}'");
+            else
+                player.SendInfo($"{target.Name} is banned by {db.ResolveIgn(target.BannedBy)} for '{target.Notes}'");
+
             return true;
         }
     }

@@ -428,6 +428,22 @@ namespace common
             return ret;
         }
 
+        public DbIpInfo GetIpInfo(string ip)
+        {
+            var ret = new DbIpInfo(_db, ip);
+            return ret;
+        }
+
+        public DbIpInfo GetIpInfo(int id)
+        {
+            var acc = GetAccount(id);
+            if (acc == null)
+                return null;
+
+            var ret = new DbIpInfo(_db, acc.IP);
+            return ret;
+        }
+
         public void LockAccount(DbAccount target, DbAccount acc, bool add)
         {
             var lockList = target.LockList.ToList();
@@ -1278,13 +1294,14 @@ namespace common
             return _db.KeyExistsAsync($"mutes:{ip}");
         }
 
-        public void Ban(int accId, string reason = "", int liftTime = -1)
+        public void Ban(int accId, string reason = "", int liftTime = -1, int bannedBy = 0)
         {
             var acc = new DbAccount(_db, accId)
             {
                 Banned = true,
                 Notes = reason,
-                BanLiftTime = liftTime
+                BanLiftTime = liftTime,
+                BannedBy = bannedBy
             };
             acc.FlushAsync();
         }
@@ -1295,6 +1312,7 @@ namespace common
             if (acc.Banned)
             {
                 acc.Banned = false;
+                acc.BannedBy = 0;
                 acc.FlushAsync();
                 return true;
             }
@@ -1302,12 +1320,13 @@ namespace common
             return false;
         }
 
-        public void BanIp(string ip, string notes = "")
+        public void BanIp(string ip, string notes = "", int bannedBy = 0)
         {
             var abi = new DbIpInfo(_db, ip)
             {
                 Banned = true,
-                Notes = notes
+                Notes = notes,
+                BannedBy = bannedBy
             };
             abi.Flush();
         }
@@ -1318,6 +1337,7 @@ namespace common
             if (!abi.IsNull && abi.Banned)
             {
                 abi.Banned = false;
+                abi.BannedBy = 0;
                 abi.Flush();
                 return true;
             }
