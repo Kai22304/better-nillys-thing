@@ -1505,23 +1505,36 @@ namespace wServer.realm.commands
             owner.Music = properName;
 
             foreach (var plr in owner.Players.Values)
-                plr.SendInfo($"World music changed to {properName}.");
+                plr.SetMusic(properName, true);
+            return true;
+        }
+    }
 
-            var i = 0;
-            foreach (var plr in owner.Players.Values)
+    class JukeBoxCommand : Command
+    {
+        public JukeBoxCommand() : base("jukebox", permLevel: 20) { }
+
+        protected override bool Process(Player player, RealmTime time, string music)
+        {
+            var resources = player.Manager.Resources;
+
+            if (string.IsNullOrWhiteSpace(music))
             {
-                owner.Timers.Add(new WorldTimer(100 * i, (w, t) =>
-                {
-                    if (plr == null)
-                        return;
-
-                    plr.Client.SendPacket(new SwitchMusic()
-                    {
-                        Music = properName
-                    });
-                }));
-                i++;
+                var msg = resources.MusicNames.Aggregate(
+                    "Music Choices: ", (c, p) => c + (p + ", "));
+                player.SendInfo(msg.Substring(0, msg.Length - 2) + ".");
+                return false;
             }
+
+            var properName = resources.MusicNames
+                .FirstOrDefault(s => s.Equals(music, StringComparison.InvariantCultureIgnoreCase));
+            if (properName == null)
+            {
+                player.SendError($"Music \"{music}\" not found!");
+                return false;
+            }
+
+            player.SetMusic(properName);
             return true;
         }
     }
