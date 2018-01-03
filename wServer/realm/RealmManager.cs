@@ -187,6 +187,7 @@ namespace wServer.realm
                 AccountId = client.Account.AccountId,
                 GuildId = client.Account.GuildId,
                 Name = client.Account.Name,
+                Rank = client.Account.Rank,
                 WorldInstance = -1
             };
             Clients[client] = plrInfo;

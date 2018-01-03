@@ -434,7 +434,7 @@ namespace wServer.realm.commands
             for (int i = 0; i < cmds.Length; i++)
             {
                 if (i != 0) sb.Append(", ");
-                sb.Append(cmds[i].CommandName);
+                sb.Append(cmds[i].CommandName + (cmds[i].Alias != null ? $" ({cmds[i].Alias})" : ""));
             }
 
             player.SendInfo(sb.ToString());
@@ -1668,6 +1668,29 @@ namespace wServer.realm.commands
                 if (i != 0) sb.Append(", ");
                 var players = player.Manager.Database.ResolveIgn(ids[i]);
                 sb.Append(players);
+            }
+            player.SendInfo(sb.ToString());
+            return true;
+        }
+    }
+
+    class StaffCommand : Command
+    {
+        public StaffCommand() : base("staff") { }
+
+        protected override bool Process(Player player, RealmTime time, string args)
+        {
+            var staff = (from server in player.Manager.InterServer.GetServerList()
+                         from plr in server.playerList
+                         where plr.Rank >= 80 && (!plr.Hidden || player.Client.Account.Admin)
+                         select plr).ToArray();
+            Array.Sort(staff, (c1, c2) => c2.Rank.CompareTo(c1.Rank));
+
+            StringBuilder sb = new StringBuilder($"Staff Members online ({staff.Length}): ");
+            for (int i = 0; i < staff.Length; i++)
+            {
+                if (i != 0) sb.Append(", ");
+                sb.Append(player.Manager.Database.ResolveIgn(staff[i].AccountId) + "(" + staff[i].Rank + ")");
             }
             player.SendInfo(sb.ToString());
             return true;

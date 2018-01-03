@@ -93,6 +93,7 @@ namespace common
         public int AccountId;
         public int GuildId;
         public string Name;
+        public int Rank;
         public string WorldName;
         public int WorldInstance;
         public bool Hidden;
